@@ -1,0 +1,36 @@
+[Abbreviations](https://github.com/gliese667-dev/notes/blob/main/Abbr.md) © 2025 by [Ole Martin Håland](https://github.com/gliese667-dev) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+# [Abbreviations](https://en.wikipedia.org/wiki/Abbreviation)
+Shortened form of a word or phrase, by any method. - *Dr. = Doctor, etc. = et cetera, Jan. = January*
+- [Contractions](https://en.wikipedia.org/wiki/Contraction_(grammar)) - Letters omitted from the middle of a word. - *Dr. for Doctor, gov’t for government.*
+- [Clipping/ Truncation / Shortening](https://en.wikipedia.org/wiki/Clipping_(morphology)) - A word cut off without adding dots. - *ad for advertisement, phone for telephone.*
+- [Portmanteau](https://en.wikipedia.org/wiki/Portmanteau) - Combining parts of two words. - *Example: smog (smoke + fog), brunch (breakfast + lunch).*
+- [Initialisms](https://en.wikipedia.org/wiki/Acronym) - Made from the first letters of words, pronounced letter by letter. - *FBI = Federal Bureau of Investigation, CPU = Central Processing Unit, PLC = Programmable Logic Controller*
+  - [Acronyms](https://en.wikipedia.org/wiki/Acronym) - Made from the first letters (or parts) of words, and pronounced as a word.
+    - [Backronyms](https://en.wikipedia.org/wiki/Backronym) - An existing word retrofitted as an acronym. - *America's Missing: Broadcast Emergency Response*
+    - [Recursive acronyms](https://en.wikipedia.org/wiki/Recursive_acronym) - An acronym where one of the letters (usually the first) refers to the acronym itself. - *GNU = GNU’s Not Unix, PHP = PHP: Hypertext Preprocessor, WINE = Wine Is Not an Emulator*
+
+| Term              | Meaning | Short explanation |
+|-------------------|---------|--------------|
+| AES               | [Advanced Encryption Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard)| A symmetric cipher (used for bulk data encryption, not certificates). |
+| CA                | [Certificate authority](https://en.wikipedia.org/wiki/Certificate_authority) | Entity that stores, signs, and issues digital certificates. |
+| CRL               | [Certificate revocation list](https://en.wikipedia.org/wiki/Certificate_revocation_list) | List of digital certificates that have been revoked by the issuing certificate authority (CA) before their scheduled expiration date and should no longer be trusted". |
+| DER               | [DER encoding](https://en.wikipedia.org/wiki/X.690#DER_encoding) | The parent format of PEM. It's useful to think of it as a binary version of the base64-encoded PEM file. Not routinely used very much outside of Windows. |
+| DSA               | [Digital Signature Algorithm](https://en.wikipedia.org/wiki/Digital_Signature_Algorithm) | Public-key cryptosystem and Federal Information Processing Standard for digital signatures, based on the mathematical concept of modular exponentiation and the discrete logarithm problem. |
+| ECDSA             | [Elliptic Curve Digital Signature Algorithm](https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm) | Offers a variant of the Digital Signature Algorithm (DSA) which uses elliptic-curve cryptography.  |
+| EdDSA             | [Edwards-curve Digital Signature Algorithm](https://en.wikipedia.org/wiki/EdDSA) | Digital signature scheme using a variant of Schnorr signature based on twisted Edwards curves. It is designed to be faster than existing digital signature schemes without sacrificing security. |
+| FQDN              | [Fully Qualified Domain Name](https://en.wikipedia.org/wiki/Fully_qualified_domain_name) | A domain name that specifies its exact location in the tree hierarchy of the Domain Name System (DNS) eg. `hostname.domain.local` |
+| NGINX             | [nginx](https://en.wikipedia.org/wiki/Nginx) | High-performance HTTP/TLS reverse proxy bundled with GitLab. |
+| OCSP              | [Online Certificate Status Protocol](https://en.wikipedia.org/wiki/Online_Certificate_Status_Protocol) | Internet protocol used for obtaining the revocation status of an X.509 digital certificate. It was created as an alternative to certificate revocation lists (CRL), specifically addressing certain problems associated with using CRLs in a public key infrastructure (PKI) |
+| OpenSSL           | [OpenSSL](https://en.wikipedia.org/wiki/OpenSSL) | Comprehensive, open-source cryptography toolkit that implements SSL and TLS. It provides a library of cryptographic functions and a command-line utility for managing private keys, certificates, and performing various cryptographic operations such as encryption, decryption, and hash calculations. 
+| PEM               | [Privacy-Enhanced Mail](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) | De facto file format for storing and sending cryptographic keys, certificates, and other data. Used preferentially by open-source software because it is text-based and therefore less prone to translation/transmission errors. It can have a variety of extensions (.pem, .key, .cer, .cert, more) |
+| PKCS7 / CMS       | [Public Key Cryptography Standards](https://en.wikipedia.org/wiki/PKCS) | [#7](https://en.wikipedia.org/wiki/PKCS_7) - An open standard used by Java and supported by Windows. Does not contain private key material. |
+| PKCS10 / CSR      | [Certificate Signing Request](https://en.wikipedia.org/wiki/Certificate_signing_request) | [#10](https://en.wikipedia.org/wiki/PKCS_10) - A message sent from an applicant to a certificate authority in order to apply for a digital identity certificate. |
+| PKCS12            | [Public Key Cryptography Standards](https://en.wikipedia.org/wiki/PKCS) | [#12](https://en.wikipedia.org/wiki/PKCS_12) - A Microsoft private standard (PFX) that was later defined in an RFC that provides enhanced security versus the plain-text PEM format. This can contain private key and certificate chain material. Its used preferentially by Windows systems, and can be freely converted to PEM format through use of openssl. |
+| PKI               | [Public Key Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure) | Set of roles, policies, hardware, software and procedures needed to create, manage, distribute, use, store and revoke digital certificates and manage public-key encryption.  |
+| RSA               | [Rivest–Shamir–Adleman](https://en.wikipedia.org/wiki/RSA_cryptosystem) | Family of public-key cryptosystems, one of the oldest widely used for secure data transmission. |
+| SSL               | [Secure Sockets Layer](https://en.wikipedia.org/wiki/Transport_Layer_Security#SSL_1.0,_2.0,_and_3.0) | Outdated internet security protocol |
+| TLS               | [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security) | A cryptographic protocol designed to provide communications security over a computer network, such as the Internet. |
+
+-----------------------------------------------------------------------------------------------------------------------
+[Abbreviations](https://github.com/gliese667-dev/notes/blob/main/Abbr.md) © 2025 by [Ole Martin Håland](https://github.com/gliese667-dev) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
