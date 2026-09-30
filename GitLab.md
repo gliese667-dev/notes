@@ -9,8 +9,7 @@ This note is just for me to remember what I found out while doing these things.
 - [1) Installing and setting up](#1-installing-and-setting-up)
   - [Installing and setting up GitLab with certificates for TLS](#setting-up-gitlab-with-certificates-for-tls)
 - [2) Upgrading](#2-upgrading)
-- [Appendix A - Acronyms, keywords, terms](#appendix-a---acronyms-keywords-terms-a)
-  - [Distinguished Name (DN) fields](#distinguished-name-dn-fields)
+- [Appendix A - Acronyms, keywords, terms](#appendix-a---acronyms-keywords-terms)
   - [Extensions & Usage Fields](#extensions--usage-fields)
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -18,7 +17,7 @@ This note is just for me to remember what I found out while doing these things.
 
 I have not actually installed it yet.
 
-#### Setting up GitLab with certificates for [TLS](#A)
+#### Setting up GitLab with certificates for [TLS](#appendix-a---acronyms-keywords-terms)
 
 Copy the certificate chain and private key to GitLab’s default SSL folder `/etc/gitlab/ssl`:
 ```bash
@@ -70,7 +69,7 @@ openssl s_client -connect gitlab:443 -servername gitlab -showcerts </dev/null
 -----------------------------------------------------------------------------------------------------------------------
 ### 2) Upgrading
 
-Some usefull sourcers:
+Some useful sources:
 - [Upgrade GitLab](https://docs.gitlab.com/update/)
     - [Upgrade a GitLab instance](https://docs.gitlab.com/update/upgrade/)
         - [Upgrade Linux package](https://docs.gitlab.com/update/package/#by-using-the-official-repositories-recommended)
@@ -84,7 +83,7 @@ At a glance:
     - For each version check that a package for your current linux distro version exist.
 
 
-### Appendix A - Acronyms, keywords, terms {#A}
+### Appendix A - Acronyms, keywords, terms
 
 | Term              | Meaning | Short explanation |
 |-------------------|---------|--------------|

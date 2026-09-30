@@ -1,4 +1,4 @@
-[Creating certificates](https://github.com/gliese667-dev/notes/blob/main//Creating%20certificates.md) © 2025 by [Ole Martin Håland](https://github.com/gliese667-dev) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+[Creating certificates](https://github.com/gliese667-dev/notes/blob/main/Creating%20certificates.md) © 2025 by [Ole Martin Håland](https://github.com/gliese667-dev) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 -----------------------------------------------------------------------------------------------------------------------
 # Creating certificates
@@ -14,10 +14,10 @@ This guide uses GitLab as example, but this should work for all TLS connections.
 - [3) Create Intermediate CA](#3-create-intermediate-ca)
 - [4) Create leaf(server) cert](#4-create-leafserver-cert)
 - [5) Certificate chain for server](#5-certificate-chain-for-server)
-- [6) Point GitLab to the cert and reload](#6-point-server-to-the-cert-and-reload)
+- [6) Point server to the cert and reload](#6-point-server-to-the-cert-and-reload)
 - [7) Trust on clients (one-time)](#7-trust-on-clients-one-time)
 - [Common pitfalls checklist](#common-pitfalls-checklist)
-- [Appendix A - Acronyms, keywords, terms](#A)
+- [Appendix A - Acronyms, keywords, terms](#appendix-a---acronyms-keywords-terms)
   - [Distinguished Name (DN) fields](#distinguished-name-dn-fields)
   - [Extensions & Usage Fields](#extensions--usage-fields)
 
@@ -58,7 +58,7 @@ Efficiency:
 - ECDSA keys are much shorter for the same security.
 - Example:
     - AES-80  ≈ RSA-1024  ≈ ECDSA-160-223
-    - AES-112 ≈ RSA-2048  ≈ ECDSA-254-255
+    - AES-112 ≈ RSA-2048  ≈ ECDSA-224-255
     - AES-128 ≈ RSA-3072  ≈ ECDSA-256-383
     - AES-192 ≈ RSA-7680  ≈ ECDSA-384-511
     - AES-256 ≈ RSA-15360 ≈ ECDSA-512
@@ -100,7 +100,7 @@ Certificates exist in a [chain of trust](https://en.wikipedia.org/wiki/Chain_of_
 #### Goal
 The goal is to create a self-signed root certificate to sign an intermediate certificate, which in turn will sign the leaf certificate. The leaf certificate will be used as a server certificate in GitLab. The root certificate must be imported into different certificate stores so that clients can verify the certificate chain served by GitLab.
 
-This is the file structure we will create for the [Public Key Infrastructure (PKI)](#A):
+This is the file structure we will create for the [Public Key Infrastructure (PKI)](#appendix-a---acronyms-keywords-terms):
 ```text
 Tree  Permission  Path                               Type            Purpose / Description
 ----------------------------------------------------------------------------------------------------------------------------------------
@@ -297,11 +297,11 @@ If your Intermediate CA is kept online (e.g., automated issuance), consider gene
 
 You may review it like this:
 ```bash
-# Private and puublic key
+# Private and public key
 sudo openssl pkey -in ~/pki/private/intermediate-ca.key -text -noout
 ```
 
-Generate the **Intermediate [CSR](#A)**:
+Generate the **Intermediate [CSR](#appendix-a---acronyms-keywords-terms)**:
 ```bash
 sudo openssl req -new -sha256 \
   -key ~/pki/private/intermediate-ca.key \
@@ -576,7 +576,7 @@ You do **not** import the leaf(server) cert anywhere if the Root is trusted.
 - [ ] Wrong file permissions (too open or too restrictive) can cause NGINX to fail loading the cert/key.
 
 -----------------------------------------------------------------------------------------------------------------------
-### Appendix A - Acronyms, keywords, terms {#A}
+### Appendix A - Acronyms, keywords, terms
 
 | Term              | Meaning | Short explanation |
 |-------------------|---------|--------------|
@@ -612,7 +612,8 @@ General [Abbreviations](Abbr.md)
 | .key      | This is a (usually) PEM formatted file containing just the private-key of a specific certificate and is merely a conventional name and not a standardized one. In Apache installs, this frequently resides in /etc/ssl/private. The rights on these files are very important, and some programs will refuse to load these certificates if they are set wrong. |
 | .pem      | Defined in RFC 1422 (part of a series from 1421 through 1424) this is a container format that may include just the public certificate (such as with Apache installs, and CA certificate files /etc/ssl/certs), or may include an entire certificate chain including public key, private key, and root certificates. Confusingly, it may also encode a CSR (e.g. as used here) as the PKCS10 format can be translated into PEM. The name is from Privacy Enhanced Mail (PEM), a failed method for secure email but the container format it used lives on, and is a base64 translation of the x509 ASN.1 keys. |
 | .pkcs12 .pfx .p12 | Originally defined by RSA in the Public-Key Cryptography Standards (abbreviated PKCS), the "12" variant was originally enhanced by Microsoft, and later submitted as RFC 7292. This is a password-protected container format that contains both public and private certificate pairs. Unlike .pem files, this container is fully encrypted. Openssl can turn this into a .pem file with both public and private keys: openssl pkcs12 -in file-to-convert.p12 -out converted-file.pem -nodes |
-| .p7b .keystore | Defined in RFC 2315 as PKCS number 7, this is a format used by Windows for certificate interchange. Java understands these natively, and often uses .keystore as an extension instead. Unlike .pem style certificates, this format has a defined way to include certification-path certificates. |
+| .p7b | Defined in RFC 2315 as PKCS number 7 (PKCS#7 / CMS), a format used by Windows for certificate interchange. Contains certificates (and optionally CRLs) but no private key material. Unlike .pem style certificates, this format has a defined way to include certification-path certificates. |
+| .keystore | Not PKCS#7 — historically Java's own JKS (Java KeyStore) format; modern Java (9+) defaults to a PKCS12-based keystore that also uses this extension. Unlike `.p7b`, a keystore can hold private keys alongside certificates. |
 
 ##### Distinguished Name (DN) fields
 | Abbreviation | Long name                | Meaning |
@@ -637,4 +638,4 @@ General [Abbreviations](Abbr.md)
 | AKI          | `authorityKeyIdentifier` | Links cert to its issuer (usually matches the issuer’s SKI). |
 
 -----------------------------------------------------------------------------------------------------------------------
-[Creating certificates](https://github.com/gliese667-dev/notes/blob/main//Creating%20certificates.md) © 2025 by [Ole Martin Håland](https://github.com/gliese667-dev) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+[Creating certificates](https://github.com/gliese667-dev/notes/blob/main/Creating%20certificates.md) © 2025 by [Ole Martin Håland](https://github.com/gliese667-dev) is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
