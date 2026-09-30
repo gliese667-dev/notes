@@ -113,7 +113,7 @@ Tree  Permission  Path                               Type            Purpose / D
 │ ├─  -rw-r--r--  ~/pki/issued/intermediate-ca.crt   Certificate     Intermediate CA certificate (signed by Root, 10 years).
 │ ├─  -rw-r--r--  ~/pki/issued/intermediate-ca.srl   Serial file     Auto-generated serial file when Intermediate signs certs.
 │ ├─  -rw-r--r--  ~/pki/issued/leaf.cnf              OpenSSL config  Config for server leaf certificate CSR (SANs, CA:false, usage).
-│ ├─  -rw-r--r--  ~/pki/issued/leaf.crt              Certificate     Leaf(server) certificate (max 825 days).
+│ ├─  -rw-r--r--  ~/pki/issued/leaf.crt              Certificate     Leaf(server) certificate (825 days in this example).
 │ ├─  -rw-r--r--  ~/pki/issued/leaf-cert-ext.cnf     OpenSSL config  Extensions for server leaf certificate (SANs, AKI/SKI).
 │ └─  -rw-r--r--  ~/pki/issued/server-chain.crt      Certificate     Canonical server chain file (Server leaf cert + intermediate cert).
 ├─┐   drwx------  ~/pki/private                      Directory       Holds private keys (restricted access).
@@ -262,15 +262,28 @@ subjectKeyIdentifier   = hash
 authorityKeyIdentifier = keyid:always,issuer
 extendedKeyUsage       = serverAuth, clientAuth
 
-# Recommended to publish these for chain-building and revocation (uncomment and set your URLs):
-# crlDistributionPoints = URI:http://pki.yourcompany.local/crl/intermediate.crl
-# authorityInfoAccess   = caIssuers;URI:http://pki.yourcompany.local/ca/intermediate.crt
+# The root CA issues this intermediate certificate, so use the root's certificate
+# and revocation list here. Enable only services you provide and set their URLs.
+#
+# Optional: the root CA's CRL lists revoked certificates issued by the root.
+# This setting can be enabled independently of AIA.
+# crlDistributionPoints = URI:http://pki.yourcompany.local/crl/root.crl
+
+# Optional AIA: uncomment at most ONE of the following three examples.
+# Leave all commented out if neither service is available.
+# Repeated authorityInfoAccess settings do not combine: only the last is used.
+# 1) CA Issuers only: where clients can download the root CA certificate.
+# authorityInfoAccess   = caIssuers;URI:http://pki.yourcompany.local/ca/root.crt
+# 2) OCSP only: the responder must be authorized to report status
+# for certificates issued by this root CA.
 # authorityInfoAccess   = OCSP;URI:http://ocsp.yourcompany.local
+# 3) Both CA Issuers and OCSP: include both locations in one setting.
+# authorityInfoAccess   = caIssuers;URI:http://pki.yourcompany.local/ca/root.crt, OCSP;URI:http://ocsp.yourcompany.local
 
 # Optional: name constraints (advanced; use with care)
 # NOTE: Not widely supported; can break clients if misconfigured.
 # nameConstraints       = permitted;DNS:.yourcompany.local      # Any leaf cert issued by that intermediate must end in .yourcompany.com.
-# nameConstraints       = permitted;IP:10.0.0.0/8               # Certificates must be in the 10.x.x.x range.
+# nameConstraints       = permitted;IP:10.0.0.0/255.0.0.0       # If a certificate contains IP addresses, they must be in the 10.x.x.x range.
 # nameConstraints       = excluded;DNS:.evil.com                # Prevents issuance for *.evil.com.
 ```
 Generate the **Intermediate key**:
@@ -360,11 +373,6 @@ commonName             = Your Company - Server Name         # CN is informationa
 # initials               = JD                                 # Rare in CA subjects
 # emailAddress           = it-ops@yourcompany.no              # Generally avoid in
 
-# Recommended to publish these for chain-building and revocation (uncomment and set your URLs):
-# crlDistributionPoints = URI:http://pki.yourcompany.local/crl/intermediate.crl
-# authorityInfoAccess   = caIssuers;URI:http://pki.yourcompany.local/ca/intermediate.crt
-# authorityInfoAccess   = OCSP;URI:http://ocsp.yourcompany.local
-
 [ req_ext ]
 # These go into the CSR. The final cert’s extensions are set at signing time by the CA.
 basicConstraints = critical, CA:false                               # Leaf certificate
@@ -433,6 +441,11 @@ openssl req -in ~/pki/csr/leaf.csr -text -noout
 Signing-time extensions (add AKI/SKI here)
 
 Create ``~/pki/issued/leaf-cert-ext.cnf``:
+
+The optional CRL and AIA settings below tell clients where to download the intermediate CA's revocation list, retrieve its certificate, or check a certificate's status using OCSP. Enable only the services you provide and replace the example URLs with their actual addresses; adding a URL to the certificate does not set up the service.
+
+The CRL setting can be enabled independently. For AIA, choose **one** of the three examples: CA Issuers only, OCSP only, or both. Leave all three commented out if neither service is available. Do not uncomment multiple `authorityInfoAccess` lines: OpenSSL uses only the last one. To include both services, use the combined example.
+
 ```ini
 [ server_cert ]
 basicConstraints       = critical, CA:false
@@ -442,6 +455,17 @@ subjectAltName         = @alt_names
 authorityKeyIdentifier = keyid,issuer
 subjectKeyIdentifier   = hash
 
+# Optional: where clients can download the intermediate CA's revocation list (CRL).
+# crlDistributionPoints = URI:http://pki.yourcompany.local/crl/intermediate.crl
+
+# Optional AIA: uncomment at most ONE of the following three examples.
+# 1) CA Issuers only: where clients can download the intermediate CA certificate.
+# authorityInfoAccess   = caIssuers;URI:http://pki.yourcompany.local/ca/intermediate.crt
+# 2) OCSP only: where clients can check certificate status online.
+# authorityInfoAccess   = OCSP;URI:http://ocsp.yourcompany.local
+# 3) Both CA Issuers and OCSP: include both locations in one setting.
+# authorityInfoAccess   = caIssuers;URI:http://pki.yourcompany.local/ca/intermediate.crt, OCSP;URI:http://ocsp.yourcompany.local
+
 [ alt_names ]
 DNS.1 = hostname
 DNS.2 = hostname.yourcompany.local
@@ -450,7 +474,10 @@ DNS.3 = hostname.yourcompany.no
 
 Sign the CSR with the **Intermediate CA**:
 ```bash
-# CA/Browser Forum Baseline Requirements (which all major browsers follow) limit TLS server certificates to a maximum of 825 days (~27 months).
+# CA/Browser Forum Baseline Requirements (which all major browsers follow) limit TLS server certificates to a maximum of 825 days (~27 months) 
+# for publicly trusted certificates; they do not set a universal maximum for certificates issued by private CA (self signed).
+# This private-PKI example uses 825 days (~27 months).
+# Choose a lifetime that meets your organization's policy and client requirements.
 sudo openssl x509 -req -days 825 \
   -in  ~/pki/csr/leaf.csr \
   -CA  ~/pki/issued/intermediate-ca.crt \
@@ -497,9 +524,10 @@ openssl verify -verbose \
   ~/pki/issued/leaf.crt
 
 # Verify chain + hostname (OpenSSL 1.1.0+)
+# Replace "hostname" with the name clients use to connect; it must match a SAN.
 openssl verify -CAfile ~/pki/root/root-ca.crt \
   -untrusted ~/pki/issued/intermediate-ca.crt \
-  -verify_hostname gitlab \
+  -verify_hostname hostname \
   ~/pki/issued/leaf.crt
 ```
 
@@ -540,29 +568,29 @@ sudo update-ca-trust extract
 ```
 
 **Arch Linux:**
-Copy the root certificate to `/etc/pki/ca-trust/source/anchors/`
+Replace `/path/to/root-ca.crt` with the location of your root certificate:
 ```bash
-trust anchor root-ca.crt
+sudo cp /path/to/root-ca.crt /etc/ca-certificates/trust-source/anchors/root-ca.crt
+sudo update-ca-trust extract
 
-# To remove the Root CA from the trust store
-sudo trust anchor --remove root-ca.crt
-
-# Or find it by name and remove explicitly:
-trust list | grep "Your Company - Local Root CA"
-
+# To remove this root certificate and refresh the trust store:
+sudo rm /etc/ca-certificates/trust-source/anchors/root-ca.crt
+sudo update-ca-trust extract
 ```
 
 **Firefox:**
-Either enable system cert store:
+On Windows and macOS, Firefox normally uses root certificates trusted by the operating system. If this feature is disabled, enable it:
 ``about:config`` → ``security.enterprise_roots.enabled = true`` → restart
 
-Or import and trust this specific CA:
+On Linux, system trust integration depends on the Firefox installation; this preference alone does not enable it. You can import the root certificate manually instead. Manual import is also an option on Windows and macOS:
 Settings → Privacy & Security → Certificates → View Certificates → **Authorities** → **Import** ``root-ca.crt`` → check “Trust this CA to identify websites.”
 
-To remove the Root CA from Firefox:
+To remove a manually imported Root CA from Firefox:
 Go to Settings → Privacy & Security → Certificates → View Certificates → **Authorities**
 Select the imported Root CA (e.g. Your Company – Local Root CA)
 Click Delete or Distrust
+
+If Firefox trusts the root through the operating system, remove it from the operating system's trust store instead.
 
 
 You do **not** import the leaf(server) cert anywhere if the Root is trusted.
@@ -594,7 +622,7 @@ You do **not** import the leaf(server) cert anywhere if the Root is trusted.
 | PEM               | [Privacy-Enhanced Mail](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) | De facto file format for storing and sending cryptographic keys, certificates, and other data. Used preferentially by open-source software because it is text-based and therefore less prone to translation/transmission errors. It can have a variety of extensions (.pem, .key, .cer, .cert, more) |
 | PKCS7 / CMS       | [Public Key Cryptography Standards](https://en.wikipedia.org/wiki/PKCS) | [#7](https://en.wikipedia.org/wiki/PKCS_7) - An open standard used by Java and supported by Windows. Does not contain private key material. |
 | PKCS10 / CSR      | [Certificate Signing Request](https://en.wikipedia.org/wiki/Certificate_signing_request) | [#10](https://en.wikipedia.org/wiki/PKCS_10) - A message sent from an applicant to a certificate authority in order to apply for a digital identity certificate. |
-| PKCS12            | [Public Key Cryptography Standards](https://en.wikipedia.org/wiki/PKCS) | [#12](https://en.wikipedia.org/wiki/PKCS_12) - A Microsoft private standard (PFX) that was later defined in an RFC that provides enhanced security versus the plain-text PEM format. This can contain private key and certificate chain material. Its used preferentially by Windows systems, and can be freely converted to PEM format through use of openssl. |
+| PKCS12            | [Public Key Cryptography Standards](https://en.wikipedia.org/wiki/PKCS) | [#12](https://en.wikipedia.org/wiki/PKCS_12) - A container format from RSA Laboratories' PKCS series, published as [RFC 7292](https://datatracker.ietf.org/doc/html/rfc7292#section-1). Can contain private keys, certificates, and certificate chains. Supports encryption, but [contents may also be unencrypted](https://datatracker.ietf.org/doc/html/rfc7292#section-4.1). PEM can also hold encrypted private keys. Commonly used on Windows as PFX, and can be converted to PEM using OpenSSL. |
 | PKI               | [Public Key Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure) | Set of roles, policies, hardware, software and procedures needed to create, manage, distribute, use, store and revoke digital certificates and manage public-key encryption.  |
 | RSA               | [Rivest–Shamir–Adleman](https://en.wikipedia.org/wiki/RSA_cryptosystem) | Family of public-key cryptosystems, one of the oldest widely used for secure data transmission. |
 | SSL               | [Secure Sockets Layer](https://en.wikipedia.org/wiki/Transport_Layer_Security#SSL_1.0,_2.0,_and_3.0) | Outdated internet security protocol |
@@ -611,7 +639,7 @@ General [Abbreviations](Abbr.md)
 | .der       | A way to encode ASN.1 syntax in binary, a .pem file is just a Base64 encoded .der file. OpenSSL can convert these to .pem (openssl x509 -inform der -in to-convert.der -out converted.pem). Windows sees these as Certificate files. By default, Windows will export certificates as .DER formatted files with a different extension. Like... |
 | .key      | This is a (usually) PEM formatted file containing just the private-key of a specific certificate and is merely a conventional name and not a standardized one. In Apache installs, this frequently resides in /etc/ssl/private. The rights on these files are very important, and some programs will refuse to load these certificates if they are set wrong. |
 | .pem      | Defined in RFC 1422 (part of a series from 1421 through 1424) this is a container format that may include just the public certificate (such as with Apache installs, and CA certificate files /etc/ssl/certs), or may include an entire certificate chain including public key, private key, and root certificates. Confusingly, it may also encode a CSR (e.g. as used here) as the PKCS10 format can be translated into PEM. The name is from Privacy Enhanced Mail (PEM), a failed method for secure email but the container format it used lives on, and is a base64 translation of the x509 ASN.1 keys. |
-| .pkcs12 .pfx .p12 | Originally defined by RSA in the Public-Key Cryptography Standards (abbreviated PKCS), the "12" variant was originally enhanced by Microsoft, and later submitted as RFC 7292. This is a password-protected container format that contains both public and private certificate pairs. Unlike .pem files, this container is fully encrypted. Openssl can turn this into a .pem file with both public and private keys: openssl pkcs12 -in file-to-convert.p12 -out converted-file.pem -nodes |
+| .pkcs12 .pfx .p12 | Defined by RSA Laboratories in its Public-Key Cryptography Standards (PKCS) series and published as [RFC 7292](https://datatracker.ietf.org/doc/html/rfc7292#section-1). A container format that can hold private keys, certificates, and certificate chains. Supports password-based encryption, but [contents are not necessarily encrypted](https://datatracker.ietf.org/doc/html/rfc7292#section-4.1). OpenSSL can export its keys and certificates to PEM: `openssl pkcs12 -in file-to-convert.p12 -out converted-file.pem -nodes`. Here, `-nodes` leaves exported private keys unencrypted; omit it to encrypt them with a password. |
 | .p7b | Defined in RFC 2315 as PKCS number 7 (PKCS#7 / CMS), a format used by Windows for certificate interchange. Contains certificates (and optionally CRLs) but no private key material. Unlike .pem style certificates, this format has a defined way to include certification-path certificates. |
 | .keystore | Not PKCS#7 — historically Java's own JKS (Java KeyStore) format; modern Java (9+) defaults to a PKCS12-based keystore that also uses this extension. Unlike `.p7b`, a keystore can hold private keys alongside certificates. |
 

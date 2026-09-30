@@ -21,6 +21,10 @@ I have not actually installed it yet.
 
 Copy the certificate chain and private key to GitLab’s default SSL folder `/etc/gitlab/ssl`:
 ```bash
+# Create the SSL directory if it does not already exist:
+sudo mkdir -p /etc/gitlab/ssl
+sudo chmod 755 /etc/gitlab/ssl
+
 # If the leaf key is encrypted, write an unencrypted runtime copy for GitLab:
 #sudo openssl pkey -in ~/pki/private/leaf.key -out /etc/gitlab/ssl/gitlab.key
 
@@ -39,9 +43,13 @@ sudo chmod 644 /etc/gitlab/ssl/gitlab.crt
 Ensure your ``/etc/gitlab/gitlab.rb`` matches one of the SAN hostnames:
 ```bash
 external_url "https://gitlab"  # or the FQDN you used in SANs
-# If you keep default filenames/paths you can omit these:
-# nginx['ssl_certificate']     = "/etc/gitlab/ssl/gitlab.crt"
-# nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
+
+# Use our manually managed certificates instead of the Let's Encrypt integration:
+letsencrypt['enable'] = false
+
+# Use the filenames created by the copy commands above, regardless of hostname:
+nginx['ssl_certificate']     = "/etc/gitlab/ssl/gitlab.crt"
+nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/gitlab.key"
 ```
 
 Apply and reload NGINX:
@@ -58,7 +66,7 @@ or with curl:
 ```bash
 curl -vk https://gitlab
 ```
-Issuer should be "<<<Your Company – Local Root CA>>>"
+Issuer should include "Your Company - Intermediate CA" (or the intermediate CA name you configured).
 Open SSL SAN should list every DNS.* you added
 
 ```bash
