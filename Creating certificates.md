@@ -57,8 +57,8 @@ The difference is math:
 Efficiency:
 - ECDSA keys are much shorter for the same security.
 - Example:
-    - AES-80  ≈ RSA-1024  ≈ ECDSA-160-223
-    - AES-112 ≈ RSA-2048  ≈ ECDSA-224-255
+    - 80-bit security  ≈ RSA-1024 ≈ ECDSA-160-223
+    - 112-bit security ≈ RSA-2048 ≈ ECDSA-224-255
     - AES-128 ≈ RSA-3072  ≈ ECDSA-256-383
     - AES-192 ≈ RSA-7680  ≈ ECDSA-384-511
     - AES-256 ≈ RSA-15360 ≈ ECDSA-512
@@ -474,8 +474,9 @@ DNS.3 = hostname.yourcompany.no
 
 Sign the CSR with the **Intermediate CA**:
 ```bash
-# CA/Browser Forum Baseline Requirements (which all major browsers follow) limit TLS server certificates to a maximum of 825 days (~27 months) 
-# for publicly trusted certificates; they do not set a universal maximum for certificates issued by private CA (self signed).
+# CA/Browser Forum Baseline Requirements limit the validity of publicly trusted
+# TLS server certificates. The limits change over time; consult the current requirements.
+# These limits do not set a universal maximum for certificates issued by this private CA.
 # This private-PKI example uses 825 days (~27 months).
 # Choose a lifetime that meets your organization's policy and client requirements.
 sudo openssl x509 -req -days 825 \
@@ -550,7 +551,7 @@ Get-ChildItem -Path Cert:\LocalMachine\Root | Where-Object { $_.Subject -like "*
 **Debian/Ubuntu:**
 Copy the root certificate to `/usr/local/share/ca-certificates/`
 ```bash 
-update-ca-certificates
+sudo update-ca-certificates
 
 # To remove the Root CA file and refresh trust store
 sudo rm /usr/local/share/ca-certificates/root-ca.crt
